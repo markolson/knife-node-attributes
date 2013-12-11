@@ -5,6 +5,7 @@ module KnifeNodeAttribute
     deps do
       require 'chef/application/solo'
       require 'chef/knife/deps'
+      require 'chef/patch_mash'
     end
 
     banner "knife node attributes NODE"
@@ -25,7 +26,7 @@ module KnifeNodeAttribute
       :default => "{}"
 
     option :output_file,
-      :short => "-o",
+      :short => "-o PATH",
       :description => "Path to write the JSON results to. If not specified, the data will be written to STDOUT"
 
     def run
@@ -76,10 +77,11 @@ module KnifeNodeAttribute
       compiler.compile_attributes
     
       out = node.merged_attributes
-      if config[:o]
-        File.open(config[:o], 'w') { |f| f.write(out.to_json) }
+      if config[:output_file]
+        File.open(config[:output_file], 'w') { |f| f.write JSON.pretty_generate(out) }
       else
         print out.to_json
+        print "\n"
       end
     end
   end
